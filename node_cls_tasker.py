@@ -10,7 +10,7 @@ class Node_Cls_Tasker():
 
 		self.args = args
 
-		self.num_classes = 2
+		self.num_classes = 10 # for Reddit
 
 		self.feats_per_node = dataset.feats_per_node
 
@@ -126,7 +126,7 @@ class Static_Node_Cls_Tasker(Node_Cls_Tasker):
 
 		self.args = args
 
-		self.num_classes = 2
+		self.num_classes = 10 # for Reddit
 
 
 

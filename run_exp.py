@@ -11,7 +11,11 @@ import elliptic_temporal_dl as ell_temp
 import uc_irv_mess_dl as ucim
 import auto_syst_dl as aus
 import sbm_dl as sbm
-import reddit_dl as rdt
+
+
+import reddit_dl as rdt_cls        
+import reddit_lp_dl as rdt_lp      
+import reddit_nc_dl as rdt_nc      
 
 
 #taskers
@@ -107,7 +111,14 @@ def build_dataset(args):
 	elif args.data == 'autonomous_syst':
 		return aus.Autonomous_Systems_Dataset(args)
 	elif args.data == 'reddit':
-		return rdt.Reddit_Dataset(args)
+		if args.task == 'link_pred':
+			return rdt_lp.Reddit_LP_Dataset(args)
+		elif args.task == 'node_cls':
+			return rdt_nc.Reddit_NC_Dataset(args)
+		elif args.task == 'edge_cls':
+			return rdt_cls.Reddit_Dataset(args)
+		else:
+			raise ValueError(f"Unsupported task '{args.task}' for Reddit dataset")
 	elif args.data.startswith('sbm'):
 		if args.data == 'sbm20':
 			args.sbm_args = args.sbm20_args

@@ -1,5 +1,7 @@
 import torch
 import utils as u
+import torch.nn.functional as F
+
 
 class Cross_Entropy(torch.nn.Module):
     """docstring for Cross_Entropy"""
@@ -37,16 +39,39 @@ class Cross_Entropy(torch.nn.Module):
         sum_exp = torch.sum(torch.exp(logits-m),dim=1, keepdim=True)
         return m + torch.log(sum_exp)
     
-    def forward(self,logits,labels):
-        '''
-        logits is a matrix M by C where m is the number of classifications and C are the number of classes
-        labels is a integer tensor of size M where each element corresponds to the class that prediction i
-        should be matching to
-        '''
-        labels = labels.view(-1,1)
-        alpha = self.weights(labels)[labels].view(-1,1)
-        loss = alpha * (- logits.gather(-1,labels) + self.logsumexp(logits))
-        return loss.mean()
+    # def forward(self,logits,labels):
+    #     '''
+    #     logits is a matrix M by C where m is the number of classifications and C are the number of classes
+    #     labels is a integer tensor of size M where each element corresponds to the class that prediction i
+    #     should be matching to
+    #     '''
+    #     labels = labels.view(-1,1)
+    #     alpha = self.weights(labels)[labels].view(-1,1)
+    #     loss = alpha * (- logits.gather(-1,labels) + self.logsumexp(logits))
+    #     return loss.mean()
+    def forward(self, logits, labels):
+        try:
+            if labels.max() >= logits.size(1):
+                # print(f"❌ Label value {labels.max().item()} exceeds logits dim {logits.size(1)}")
+                # print("‼️ Offending labels:", labels[labels >= logits.size(1)])
+                # print("‼️ logits.shape:", logits.shape)
+                raise ValueError("Label index out of bounds for logits dimension!")
+
+            labels = labels.view(-1, 1)  # [B, 1]
+
+            log_probs = F.log_softmax(logits, dim=1)  # [B, C]
+
+            picked_log_probs = log_probs.gather(1, labels).squeeze(1)  # [B]
+
+            loss = -picked_log_probs.mean()
+
+            print("✅ Loss computed:", loss.item())
+            return loss
+
+        except Exception as e:
+            print("❌ Loss computation failed!")
+            raise e
+
 
 if __name__ == '__main__':
     dataset = u.Namespace({'num_non_existing': torch.tensor(10)})

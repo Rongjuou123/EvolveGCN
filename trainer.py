@@ -13,7 +13,6 @@ class Trainer():
 		self.gcn = gcn
 		self.classifier = classifier
 		self.comp_loss = comp_loss
-
 		self.num_nodes = dataset.num_nodes
 		self.data = dataset
 		self.num_classes = num_classes
@@ -100,8 +99,11 @@ class Trainer():
 												   s.hist_ndFeats_list,
 												   s.label_sp['idx'],
 												   s.node_mask_list)
-
+			
+			
 			loss = self.comp_loss(predictions,s.label_sp['vals'])
+			
+
 			# print(loss)
 			if set_name in ['TEST', 'VALID'] and self.args.task == 'link_pred':
 				self.logger.log_minibatch(predictions, s.label_sp['vals'], loss.detach(), adj = s.label_sp['idx'])

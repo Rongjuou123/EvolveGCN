@@ -92,14 +92,18 @@ class Logger():
         self.ep_time = self.lasttime
 
     def log_minibatch(self, predictions, true_classes, loss, **kwargs):
-
+        
         probs = torch.softmax(predictions,dim=1)[:,1]
-        if self.set in ['TEST', 'VALID'] and self.args.task == 'link_pred':
-            MRR = self.get_MRR(probs,true_classes, kwargs['adj'],do_softmax=False)
-        else:
+        if self.args.task == 'node_cls':
             MRR = torch.tensor([0.0])
+            MAP = torch.tensor(self.get_MAP(predictions, true_classes, do_softmax=True))
+        else:
+            if self.set in ['TEST', 'VALID'] and self.args.task == 'link_pred':
+                MRR = self.get_MRR(probs,true_classes, kwargs['adj'],do_softmax=False)
+            else:
+                MRR = torch.tensor([0.0])
 
-        MAP = torch.tensor(self.get_MAP(probs,true_classes, do_softmax=False))
+            MAP = torch.tensor(self.get_MAP(probs,true_classes, do_softmax=False))
 
         error, conf_mat_per_class = self.eval_predicitions(predictions, true_classes, self.num_classes)
         conf_mat_per_class_at_k={}
@@ -241,15 +245,49 @@ class Logger():
 
 
     def get_MAP(self,predictions,true_classes, do_softmax=False):
-        if do_softmax:
-            probs = torch.softmax(predictions,dim=1)[:,1]
+        if self.args.task == 'node_cls' and predictions.ndim == 2 and predictions.shape[1] > 2:
+            if do_softmax:
+                probs = torch.softmax(predictions, dim=1)
+            else:
+                probs = predictions
+            predictions_np = probs.detach().cpu().numpy()
+            true_classes_np = torch.nn.functional.one_hot(true_classes, num_classes=predictions.shape[1]).cpu().numpy()
+            return average_precision_score(true_classes_np, predictions_np, average='macro')
         else:
-            probs = predictions
+            if do_softmax:
+                probs = torch.softmax(predictions,dim=1)[:,1]
+            else:
+                probs = predictions
 
-        predictions_np = probs.detach().cpu().numpy()
-        true_classes_np = true_classes.detach().cpu().numpy()
+            predictions_np = probs.detach().cpu().numpy()
+            true_classes_np = true_classes.detach().cpu().numpy()
 
-        return average_precision_score(true_classes_np, predictions_np)
+            return average_precision_score(true_classes_np, predictions_np)
+    
+    def get_multiclass_metrics(y_true, y_pred_logits, average='macro'):
+        """
+        Compute precision, recall, F1-score for multi-class predictions.
+
+        Parameters:
+        - y_true: numpy array of shape (N,)
+        - y_pred_logits: numpy array of shape (N, C)
+        - average: str, 'macro' or 'micro'
+
+        Returns:
+        - precision, recall, f1
+        4.17 to be continued
+        """
+        from sklearn.metrics import precision_score, recall_score, f1_score
+        import numpy as np
+
+        y_pred = np.argmax(y_pred_logits, axis=1)
+
+        precision = precision_score(y_true, y_pred, average=average, zero_division=0)
+        recall = recall_score(y_true, y_pred, average=average, zero_division=0)
+        f1 = f1_score(y_true, y_pred, average=average, zero_division=0)
+
+        return precision, recall, f1
+
 
     def eval_predicitions(self, predictions, true_classes, num_classes):
         predicted_classes = predictions.argmax(dim=1)
