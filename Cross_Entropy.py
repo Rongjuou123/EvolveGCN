@@ -52,9 +52,6 @@ class Cross_Entropy(torch.nn.Module):
     def forward(self, logits, labels):
         try:
             if labels.max() >= logits.size(1):
-                # print(f"❌ Label value {labels.max().item()} exceeds logits dim {logits.size(1)}")
-                # print("‼️ Offending labels:", labels[labels >= logits.size(1)])
-                # print("‼️ logits.shape:", logits.shape)
                 raise ValueError("Label index out of bounds for logits dimension!")
 
             labels = labels.view(-1, 1)  # [B, 1]
@@ -65,11 +62,11 @@ class Cross_Entropy(torch.nn.Module):
 
             loss = -picked_log_probs.mean()
 
-            print("✅ Loss computed:", loss.item())
+            print("Loss computed:", loss.item())
             return loss
 
         except Exception as e:
-            print("❌ Loss computation failed!")
+            print("Loss computation failed.")
             raise e
 
 

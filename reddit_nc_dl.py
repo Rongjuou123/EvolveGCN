@@ -45,7 +45,7 @@ class Reddit_NC_Dataset():
             if name in self.node2id:
                 nid = self.node2id[name]
                 label = int(row['label'])
-                time = int(row['time'])  # 原始时间
+                time = int(row['time'])  
                 label_data.append([nid, label, time])
 
         
@@ -56,7 +56,7 @@ class Reddit_NC_Dataset():
                 label_data_ext.append([nid, label, t])
         label_data_ext = torch.tensor(label_data_ext, dtype=torch.long)
         labels = label_data_ext[:, 1]
-        print("🧪 Label sanity check:")
+        print("Label sanity check:")
         print(" - unique labels:", torch.unique(labels))
         print(" - min:", labels.min().item(), "max:", labels.max().item())
         print(" - dtype:", labels.dtype)
