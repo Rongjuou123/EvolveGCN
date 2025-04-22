@@ -6,6 +6,8 @@ reddit_args:
   body_edges_file: soc-redditHyperlinks-body.tsv
   nodes_file: web-redditEmbeddings-subreddits.csv
   aggr_time: 7 #number of days
+  restrict_start: 0
+  restrict_end: 3000
 
 use_cuda: True
 use_logfile: True
@@ -38,7 +40,7 @@ early_stop_patience: 50
 
 eval_after_epochs: 5
 adj_mat_time_window: 1  # Time window to create the adj matrix for each timestep. Use None to use all the history (from 0 to t)
-num_hist_steps: 10 # number of previous steps used for prediction
+num_hist_steps: 4 # number of previous steps used for prediction
 num_hist_steps_min: 3 # only used if num_hist_steps: None
 num_hist_steps_max: 10 # only used if num_hist_steps: None
 

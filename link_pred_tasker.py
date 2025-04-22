@@ -149,7 +149,13 @@ class Link_Pred_Tasker():
 
 		
 		if 'all_edges' in kwargs.keys() and kwargs['all_edges'] == True:
-			non_exisiting_adj = tu.get_all_non_existing_edges(adj = label_adj, tot_nodes = self.data.num_nodes)
+			non_exisiting_adj = tu.get_non_existing_edges(
+															adj=label_adj,
+															number=10000, 
+															tot_nodes=self.data.num_nodes,
+															smart_sampling=True,
+															existing_nodes=torch.unique(label_adj['idx'])  # 或者 label_adj['idx'][:,0].unique()
+														)
 		else:
 			non_exisiting_adj = tu.get_non_existing_edges(adj = label_adj,
 													  number = label_adj['vals'].size(0) * neg_mult,

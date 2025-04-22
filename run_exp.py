@@ -17,6 +17,8 @@ import reddit_dl as rdt_cls
 import reddit_lp_dl as rdt_lp      
 import reddit_nc_dl as rdt_nc      
 
+import higgs_dl as hig
+
 
 #taskers
 import link_pred_tasker as lpt
@@ -125,6 +127,8 @@ def build_dataset(args):
 		elif args.data == 'sbm50':
 			args.sbm_args = args.sbm50_args
 		return sbm.sbm_dataset(args)
+	elif args.data == 'higgs':
+		return hig.Higgs_Dataset(args)
 	else:
 		raise NotImplementedError('only arxiv has been implemented')
 
